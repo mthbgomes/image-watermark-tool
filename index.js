@@ -9,28 +9,33 @@ async function watermarkImages() {
   const sourceImage = path.join(sourceImagePath, image);
   const sourceImageWidth = sizeOf(sourceImage).width;
   const sourceImageHeight = sizeOf(sourceImage).height;
+  const watermarkXPosition = sourceImageWidth * 0.5; //horizontally centered
+  const watermarkYPosition = sourceImageHeight * 0.5; //vertically centered
   const outputImagesPath = './watermarkedImages';
-  const watermarkInfos =
+  const watermarkSourceInfo =
     fs
       .readFileSync('watermarkInfos.txt')
       .toString()
       .split("\n")
       .map(line => line.trim());
+  const watermarkTextColor = 'rgba(0, 0, 0, 0.5)';
+  const watermarkFontStyle = '18px Verdana';
+  const watermarkTextAlign = 'center'
 
   const mimeType = 'image/png';
   const fileExtension = mimeType.split('/')[1];
   console.log(fileExtension)
 
-  for (const info of watermarkInfos) {
+  for (const info of watermarkSourceInfo) {
     try {
       const outputImage = await loadImage(sourceImage);
       const canvas = createCanvas(sourceImageWidth, sourceImageHeight);
       const ctx = canvas.getContext('2d');
       ctx.drawImage(outputImage, 0, 0, sourceImageWidth, sourceImageHeight);
-      ctx.font = "18px 'Verdana'";
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.textAlign = 'center';
-      ctx.fillText(info, (sourceImageWidth * 0.5), (sourceImageHeight * 0.5));
+      ctx.font = watermarkFontStyle;
+      ctx.fillStyle = watermarkTextColor;
+      ctx.textAlign = watermarkTextAlign;
+      ctx.fillText(info, watermarkXPosition, watermarkYPosition);
       const buffer = canvas.toBuffer(mimeType);
       const outputImagePath = path.join(outputImagesPath, `${info}.${fileExtension}`);
       console.log(outputImagePath)
